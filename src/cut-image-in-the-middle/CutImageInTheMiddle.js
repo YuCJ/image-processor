@@ -11,7 +11,9 @@ const Page = styled.div`
 `;
 
 const Controls = styled.div`
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
   width: 90%;
   margin: 10px auto;
 `;
@@ -45,6 +47,7 @@ export default function CutImageInTheMiddle() {
       </Controls>
       <Controls>
         <button
+          disabled={!isEditing && !imageDataUrl}
           onClick={() => {
             setIsEditing(!isEditing);
           }}

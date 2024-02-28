@@ -1,55 +1,19 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import Konva from 'konva';
 
 const Container = styled.div`
-  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 function Editing({ imageDataUrl, cuts, sortedCutIds, updateCut, removeCut }) {
   const stageRef = useRef(null);
   const konvaRef = useRef({});
-
-  // initialize
-  useEffect(() => {
-    if (stageRef.current) {
-      const stage = new Konva.Stage({
-        container: stageRef.current,
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-      const imageLayer = new Konva.Layer();
-      const cutsLayer = new Konva.Layer();
-
-      stage.add(imageLayer, cutsLayer);
-
-      konvaRef.current.stage = stage;
-      konvaRef.current.imageLayer = imageLayer;
-      konvaRef.current.cutsLayer = cutsLayer;
-    }
-  }, []);
-
-  // image
-  useEffect(() => {
-    if (imageDataUrl && konvaRef.current.imageLayer) {
-      const image = new window.Image();
-      image.onload = () => {
-        konvaRef.current.image = new Konva.Image({
-          image,
-          width: image.width,
-          height: image.height,
-        });
-        konvaRef.current.imageLayer.add(konvaRef.current.image);
-      };
-      image.src = imageDataUrl;
-    }
-  }, [imageDataUrl]);
-
-  // cuts
-  useEffect(() => {
+  const drawCuts = useCallback(() => {
     if (konvaRef.current.cutsLayer) {
-      konvaRef.current.cutsLayer.destroyChildren();
       const rects = sortedCutIds.map(
         id =>
           new Konva.Rect({
@@ -57,11 +21,12 @@ function Editing({ imageDataUrl, cuts, sortedCutIds, updateCut, removeCut }) {
             y: cuts[id].top,
             width: konvaRef.current.cutsLayer.width(),
             height: cuts[id].bottom - cuts[id].top,
-            fill: 'green',
+            fill: 'black',
             strokeWidth: 0,
+            opacity: 0.8,
           })
       );
-      konvaRef.current.cutsLayer.add(...rects);
+
       const cutRemoveButtons = sortedCutIds.map(id => {
         const label = new Konva.Label({
           x: konvaRef.current.cutsLayer.width() - 140,
@@ -69,7 +34,7 @@ function Editing({ imageDataUrl, cuts, sortedCutIds, updateCut, removeCut }) {
         });
         label.add(
           new Konva.Tag({
-            fill: 'red',
+            fill: 'grey',
             pointerDirection: 'left',
             pointerWidth: 20,
             pointerHeight: 28,
@@ -91,7 +56,7 @@ function Editing({ imageDataUrl, cuts, sortedCutIds, updateCut, removeCut }) {
         return label;
       });
 
-      rects.forEach((rect, i) => {
+      const trs = rects.map((rect, i) => {
         const tr = new Konva.Transformer({
           nodes: [rect],
           enabledAnchors: ['top-center', 'bottom-center'],
@@ -119,18 +84,59 @@ function Editing({ imageDataUrl, cuts, sortedCutIds, updateCut, removeCut }) {
             return newBoundBox;
           },
         });
-        konvaRef.current.cutsLayer.add(tr);
         rect.on('transformend', function() {
           updateCut(sortedCutIds[i], {
             top: tr.y(),
             bottom: tr.y() + tr.height(),
           });
         });
+        return tr;
       });
 
+      konvaRef.current.cutsLayer.destroyChildren();
+      konvaRef.current.cutsLayer.add(...rects);
+      konvaRef.current.cutsLayer.add(...trs);
       konvaRef.current.cutsLayer.add(...cutRemoveButtons);
     }
   }, [cuts, sortedCutIds, updateCut, removeCut]);
+
+  // initialize
+  useEffect(() => {
+    if (stageRef.current) {
+      const stage = new Konva.Stage({
+        container: stageRef.current,
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+      const imageLayer = new Konva.Layer();
+      const cutsLayer = new Konva.Layer();
+
+      stage.add(imageLayer, cutsLayer);
+
+      konvaRef.current.stage = stage;
+      konvaRef.current.imageLayer = imageLayer;
+      konvaRef.current.cutsLayer = cutsLayer;
+    }
+  }, []);
+
+  // image
+  useEffect(() => {
+    if (imageDataUrl && konvaRef.current.imageLayer) {
+      const image = new window.Image();
+      image.onload = () => {
+        konvaRef.current.stage.width(image.width + 50);
+        konvaRef.current.stage.height(image.height);
+        konvaRef.current.image = new Konva.Image({
+          image,
+          width: image.width,
+          height: image.height,
+        });
+        konvaRef.current.imageLayer.add(konvaRef.current.image);
+        drawCuts();
+      };
+      image.src = imageDataUrl;
+    }
+  }, [imageDataUrl, drawCuts]);
 
   if (!imageDataUrl) {
     return 'no image';
@@ -138,9 +144,9 @@ function Editing({ imageDataUrl, cuts, sortedCutIds, updateCut, removeCut }) {
 
   return (
     <Container>
+      <div ref={stageRef}></div>
       <div>{JSON.stringify(sortedCutIds)}</div>
       <div>{JSON.stringify(cuts, undefined, 2)}</div>
-      <div ref={stageRef}></div>
     </Container>
   );
 }

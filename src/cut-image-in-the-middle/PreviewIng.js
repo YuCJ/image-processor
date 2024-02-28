@@ -4,7 +4,9 @@ import styled from 'styled-components';
 import Konva from 'konva';
 
 const Container = styled.div`
-  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;
 
 const downloadURI = (uri, name) => {
