@@ -35,6 +35,7 @@ function PreviewIng({ imageDataUrl, cuts, sortedCutIds }) {
     if (imageDataUrl && konvaRef.current.imageLayer) {
       const image = new window.Image();
       image.onload = () => {
+        konvaRef.current.stage.width(image.width);
         konvaRef.current.stage.height(
           sortedCutIds.reduce((accu, id) => {
             const cut = cuts[id];
@@ -46,32 +47,48 @@ function PreviewIng({ imageDataUrl, cuts, sortedCutIds }) {
           }, image.height)
         );
 
-        if (sortedCutIds.length > 0) {
-          const konvaImages = sortedCutIds.map(
-            (id, i) =>
-              new Konva.Image({
-                image,
-                width: image.width,
-                y: i > 0 ? cuts[sortedCutIds[i - 1]].bottom : 0,
-                height:
-                  i > 0
-                    ? cuts[sortedCutIds[id]].top -
-                      cuts[sortedCutIds[i - 1]].bottom
-                    : cuts[id].top,
-              })
-          );
+        const cutsCount = sortedCutIds.length;
+        if (cutsCount > 0) {
+          let konvaY = 0;
+          const tasks = [];
+          for (let i = 0; i <= cutsCount; i++) {
+            const bitmapSy = i > 0 ? cuts[sortedCutIds[i - 1]].bottom : 0;
+            const height =
+              i < cutsCount
+                ? cuts[sortedCutIds[i]].top - bitmapSy
+                : image.height - bitmapSy;
+            tasks.push({
+              bitmapSy,
+              bitmapSh: height,
+              konvaY,
+              konvaHeight: height,
+            });
+            konvaY += height;
+          }
 
-          konvaImages.push(
-            new Konva.Image({
-              image,
-              width: image.width,
-              y: cuts[sortedCutIds[sortedCutIds.length - 1]].bottom,
-              height:
-                image.height -
-                cuts[sortedCutIds[sortedCutIds.length - 1]].bottom,
-            })
-          );
-          konvaRef.current.imageLayer.add(...konvaImages);
+          Promise.all(
+            tasks.map(task =>
+              window
+                .createImageBitmap(
+                  image,
+                  0,
+                  task.bitmapSy,
+                  image.width,
+                  task.bitmapSh
+                )
+                .then(
+                  sprite =>
+                    new Konva.Image({
+                      image: sprite,
+                      y: task.konvaY,
+                      width: image.width,
+                      height: task.konvaHeight,
+                    })
+                )
+            )
+          ).then(konvaImages => {
+            konvaRef.current.imageLayer.add(...konvaImages);
+          });
         } else {
           konvaRef.current.imageLayer.add(
             new Konva.Image({
