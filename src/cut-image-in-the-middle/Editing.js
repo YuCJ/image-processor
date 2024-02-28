@@ -3,9 +3,11 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import Konva from 'konva';
 
-const Container = styled.div``;
+const Container = styled.div`
+  background: #ffffff;
+`;
 
-function Editing({ imageDataUrl, cuts, sortedCutIds }) {
+function Editing({ imageDataUrl, cuts, sortedCutIds, updateCut }) {
   const stageRef = useRef(null);
   const konvaRef = useRef({});
 
@@ -44,6 +46,55 @@ function Editing({ imageDataUrl, cuts, sortedCutIds }) {
     }
   }, [imageDataUrl]);
 
+  // cuts
+  useEffect(() => {
+    if (konvaRef.current.cutsLayer) {
+      konvaRef.current.cutsLayer.destroyChildren();
+      const rects = sortedCutIds.map(
+        id =>
+          new Konva.Rect({
+            x: 0,
+            y: cuts[id].top,
+            width: konvaRef.current.cutsLayer.width(),
+            height: cuts[id].bottom - cuts[id].top,
+            fill: 'green',
+            strokeWidth: 0,
+          })
+      );
+      konvaRef.current.cutsLayer.add(...rects);
+      rects.forEach((rect, i) => {
+        const tr = new Konva.Transformer({
+          nodes: [rect],
+          enabledAnchors: ['top-center', 'bottom-center'],
+          rotateEnabled: false,
+          flipEnabled: false,
+          keepRatio: false,
+          boundBoxFunc: function(oldBoundBox, newBoundBox) {
+            if (i > 0 && newBoundBox.y <= cuts[sortedCutIds[i - 1]].bottom) {
+              return oldBoundBox;
+            }
+            const lastIndex = rects.length - 1;
+            if (
+              i < lastIndex &&
+              newBoundBox.y + newBoundBox.height >=
+                cuts[sortedCutIds[i + 1]].top
+            ) {
+              return oldBoundBox;
+            }
+            return newBoundBox;
+          },
+        });
+        konvaRef.current.cutsLayer.add(tr);
+        rect.on('transformend', function() {
+          updateCut(sortedCutIds[i], {
+            top: rect.y(),
+            bottom: rect.y() + rect.height(),
+          });
+        });
+      });
+    }
+  }, [cuts, sortedCutIds]);
+
   if (!imageDataUrl) {
     return 'no image';
   }
@@ -67,6 +118,7 @@ Editing.propTypes = {
     })
   ).isRequired,
   sortedCutIds: PropTypes.arrayOf(PropTypes.string).isRequired,
+  updateCut: PropTypes.func.isRequired,
 };
 
 export default Editing;

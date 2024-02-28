@@ -7,6 +7,7 @@ import ImageInput from '../ImageInput';
 
 const Page = styled.div`
   padding: 20px 40px;
+  background: #f1f1f1;
 `;
 
 const Controls = styled.div`
@@ -97,6 +98,7 @@ export default function CutImageInTheMiddle() {
           cuts={cuts}
           sortedCutIds={sortedCutIds}
           imageDataUrl={imageDataUrl}
+          updateCut={updateCut}
         />
       ) : (
         <PreviewIng />
