@@ -5,11 +5,13 @@ const actions = {
   remove: 'remove',
   add: 'add',
   update: 'update',
+  clear: 'clear',
 };
 
 const initialState = {
   sortedIds: [],
   store: {},
+  idCounter: 0,
 };
 
 function removeCut(state, cutId) {
@@ -17,6 +19,7 @@ function removeCut(state, cutId) {
   if (cut) {
     const i = state.sortedIds.findIndex(id => id === cutId);
     return {
+      ...state,
       sortedIds: [
         ...state.sortedIds.slice(0, i),
         ...state.sortedIds.slice(i + 1),
@@ -31,27 +34,32 @@ function addCut(state, cut) {
   const { sortedIds, store } = state;
   const { id } = cut;
   if (sortedIds.length > 0) {
-    const insertTargetIndex = _.sortedIndexBy(sortedIds, id => store[id].top);
+    const nextStore = {
+      ...store,
+      [id]: cut,
+    };
+    const insertTargetIndex = _.sortedIndexBy(
+      sortedIds,
+      id => nextStore[id].top
+    );
     return {
+      ...state,
       sortedIds: [
         ...sortedIds.slice(0, insertTargetIndex),
         id,
         ...sortedIds.slice(insertTargetIndex),
       ],
-      store: {
-        ...store,
-        [id]: cut,
-      },
+      store: nextStore,
     };
   }
   return {
+    ...state,
     sortedIds: [cut.id],
     store: { [cut.id]: cut },
   };
 }
 
-function cutsReducer(state = initialState, action) {
-  let id = 0;
+function cutsReducer(state, action) {
   switch (action?.type) {
     case actions.update: {
       const cut = {
@@ -65,12 +73,18 @@ function cutsReducer(state = initialState, action) {
       return removeCut(state, action.id);
     }
     case actions.add: {
-      id += 1;
+      const nextId = state.idCounter + 1;
       const cut = {
-        id,
+        id: `${nextId}`,
         ...action.props,
       };
-      return addCut(state, cut);
+      return {
+        ...addCut(state, cut),
+        idCounter: nextId,
+      };
+    }
+    case actions.clear: {
+      return initialState;
     }
     default: {
       return state;
@@ -79,7 +93,7 @@ function cutsReducer(state = initialState, action) {
 }
 
 export default function useCuts() {
-  const [state, dispatch] = useReducer(cutsReducer);
+  const [state, dispatch] = useReducer(cutsReducer, initialState);
   return {
     cuts: state.store,
     sortedIds: state.sortedIds,
@@ -91,6 +105,9 @@ export default function useCuts() {
     },
     update: (id, props) => {
       dispatch({ type: actions.update, id, props });
+    },
+    clear: () => {
+      dispatch({ type: actions.clear });
     },
   };
 }
