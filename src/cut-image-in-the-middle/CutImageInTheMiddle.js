@@ -26,7 +26,7 @@ export default function CutImageInTheMiddle() {
   const [isEditing, setIsEditing] = useState();
   return (
     <Page>
-      <H1>CutImageInTheMiddle</H1>
+      <H1>Cut Image in the Middle</H1>
       <Controls>
         <button
           onClick={() => {
