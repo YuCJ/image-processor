@@ -145,8 +145,6 @@ function Editing({ imageDataUrl, cuts, sortedCutIds, updateCut, removeCut }) {
   return (
     <Container>
       <div ref={stageRef}></div>
-      <div>{JSON.stringify(sortedCutIds)}</div>
-      <div>{JSON.stringify(cuts, undefined, 2)}</div>
     </Container>
   );
 }

@@ -25,8 +25,9 @@ const H1 = styled.h1`
 `;
 
 export default function CutImageInTheMiddle() {
-  const [isEditing, setIsEditing] = useState();
+  const [isEditing, setIsEditing] = useState(false);
   const [imageDataUrl, setImageDateUrl] = useState('');
+  const [showDebug, setShowDebug] = useState(false);
   const {
     cuts,
     sortedIds: sortedCutIds,
@@ -82,6 +83,12 @@ export default function CutImageInTheMiddle() {
           </button>
         </Controls>
       ) : null}
+      {showDebug ? (
+        <>
+          <div>sortedCutIds: {JSON.stringify(sortedCutIds)}</div>
+          <div>cuts: {JSON.stringify(cuts, undefined, 2)}</div>
+        </>
+      ) : null}
       {isEditing ? (
         <Editing
           cuts={cuts}
@@ -97,6 +104,14 @@ export default function CutImageInTheMiddle() {
           imageDataUrl={imageDataUrl}
         />
       )}
+      <button
+        style={{ position: 'absolute', top: '5px', left: '5px' }}
+        onClick={() => {
+          setShowDebug(!showDebug);
+        }}
+      >
+        Debug
+      </button>
     </Page>
   );
 }

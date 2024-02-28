@@ -127,8 +127,6 @@ function PreviewIng({ imageDataUrl, cuts, sortedCutIds }) {
         Download
       </button>
       <div ref={stageRef}></div>
-      <div>{JSON.stringify(sortedCutIds)}</div>
-      <div>{JSON.stringify(cuts, undefined, 2)}</div>
     </Container>
   );
 }
