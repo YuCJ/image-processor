@@ -80,7 +80,7 @@ export default function CutImageInTheMiddle() {
       ) : null}
       <code>{JSON.stringify(sortedIds)}</code>
       <code>{JSON.stringify(cuts)}</code>
-      {isEditing ? Editing : PreviewIng}
+      {isEditing ? <Editing /> : <PreviewIng />}
     </Page>
   );
 }
