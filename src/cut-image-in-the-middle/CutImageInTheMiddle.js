@@ -55,7 +55,16 @@ export default function CutImageInTheMiddle() {
         <Controls>
           <button
             onClick={() => {
-              addCuts({ top: 0, bottom: 0 });
+              if (sortedCutIds.length > 0) {
+                const lastCutBottom =
+                  cuts[sortedCutIds[sortedCutIds.length - 1]].bottom;
+                addCuts({
+                  top: lastCutBottom + 10,
+                  bottom: lastCutBottom + 20,
+                });
+              } else {
+                addCuts({ top: 10, bottom: 20 });
+              }
             }}
           >
             Add Cut
