@@ -130,7 +130,7 @@ function Editing({ imageDataUrl, cuts, sortedCutIds, updateCut, removeCut }) {
 
       konvaRef.current.cutsLayer.add(...cutRemoveButtons);
     }
-  }, [cuts, sortedCutIds, updateCut]);
+  }, [cuts, sortedCutIds, updateCut, removeCut]);
 
   if (!imageDataUrl) {
     return 'no image';
