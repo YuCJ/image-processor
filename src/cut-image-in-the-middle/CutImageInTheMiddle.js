@@ -1,37 +1,42 @@
-import React, { useRef } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import useImageInput from '../useImageInput';
+import Editing from './Editing';
+import PreviewIng from './PreviewIng';
+
+const Page = styled.div`
+  padding: 20px 40px;
+
+  & > * {
+    margin-bottom: 5px;
+  }
+`;
+
+const Controls = styled.div`
+  text-align: center;
+  width: 90%;
+  margin: 0 auto;
+`;
 
 const H1 = styled.h1`
   color: red;
+  text-align: center;
 `;
 
 export default function CutImageInTheMiddle() {
-  const canvasRef = useRef(null);
-  const drawImage = ({ imageDataUrl }) => {
-    if (!imageDataUrl) return;
-
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-
-    const image = new window.Image();
-    image.onload = () => {
-      const width = image.width;
-      const height = image.height;
-      canvas.width = width;
-      canvas.height = height;
-      ctx.drawImage(image, 0, 0);
-    };
-    image.src = imageDataUrl;
-  };
-
-  const [input] = useImageInput({ onChange: drawImage });
-
+  const [isEditing, setIsEditing] = useState();
   return (
-    <div>
+    <Page>
       <H1>CutImageInTheMiddle</H1>
-      {input}
-      <canvas ref={canvasRef}></canvas>
-    </div>
+      <Controls>
+        <button
+          onClick={() => {
+            setIsEditing(!isEditing);
+          }}
+        >
+          {isEditing ? 'Preview' : 'Edit'}
+        </button>
+      </Controls>
+      {isEditing ? Editing : PreviewIng}
+    </Page>
   );
 }
