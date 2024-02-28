@@ -60,11 +60,11 @@ export default function CutImageInTheMiddle() {
                 const lastCutBottom =
                   cuts[sortedCutIds[sortedCutIds.length - 1]].bottom;
                 addCuts({
-                  top: lastCutBottom + 10,
-                  bottom: lastCutBottom + 20,
+                  top: lastCutBottom + 30,
+                  bottom: lastCutBottom + 60,
                 });
               } else {
-                addCuts({ top: 10, bottom: 20 });
+                addCuts({ top: 20, bottom: 50 });
               }
             }}
           >
@@ -101,7 +101,11 @@ export default function CutImageInTheMiddle() {
           updateCut={updateCut}
         />
       ) : (
-        <PreviewIng />
+        <PreviewIng
+          cuts={cuts}
+          sortedCutIds={sortedCutIds}
+          imageDataUrl={imageDataUrl}
+        />
       )}
     </Page>
   );

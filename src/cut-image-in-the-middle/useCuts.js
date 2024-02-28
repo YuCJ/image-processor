@@ -62,12 +62,18 @@ function addCut(state, cut) {
 function cutsReducer(state, action) {
   switch (action?.type) {
     case actions.update: {
-      const cut = {
-        id: action.id,
-        ...state.store[action.id],
-        ...action.props,
+      const nextStore = {
+        ...state.store,
+        [action.id]: {
+          ...state.store[action.id],
+          ...action.props,
+        },
       };
-      return addCut(removeCut(state, action.id), cut);
+      return {
+        ...state,
+        sortedIds: _.sortBy(state.sortedIds, id => nextStore[id].top),
+        store: nextStore,
+      };
     }
     case actions.remove: {
       return removeCut(state, action.id);

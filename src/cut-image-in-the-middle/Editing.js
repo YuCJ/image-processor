@@ -70,14 +70,20 @@ function Editing({ imageDataUrl, cuts, sortedCutIds, updateCut }) {
           flipEnabled: false,
           keepRatio: false,
           boundBoxFunc: function(oldBoundBox, newBoundBox) {
-            if (i > 0 && newBoundBox.y <= cuts[sortedCutIds[i - 1]].bottom) {
-              return oldBoundBox;
-            }
-            const lastIndex = rects.length - 1;
+            const minHeight = 10;
             if (
-              i < lastIndex &&
-              newBoundBox.y + newBoundBox.height >=
-                cuts[sortedCutIds[i + 1]].top
+              // newBoundBox.y < minY
+              newBoundBox.y <
+                (i > 0 ? Math.ceil(cuts[sortedCutIds[i - 1]].bottom) + 5 : 0) ||
+              // newBoundBox.y+height> max y+height
+              newBoundBox.y + newBoundBox.height >
+                (i < sortedCutIds.length - 1
+                  ? Math.floor(cuts[sortedCutIds[i + 1]].top) - 5
+                  : konvaRef.current.image.height()) ||
+              // newBoundBox.height < minHeight
+              newBoundBox.height < minHeight ||
+              // newBoundBox.y > maxY
+              newBoundBox.y > konvaRef.current.image.height() - minHeight
             ) {
               return oldBoundBox;
             }
@@ -87,13 +93,13 @@ function Editing({ imageDataUrl, cuts, sortedCutIds, updateCut }) {
         konvaRef.current.cutsLayer.add(tr);
         rect.on('transformend', function() {
           updateCut(sortedCutIds[i], {
-            top: rect.y(),
-            bottom: rect.y() + rect.height(),
+            top: tr.y(),
+            bottom: tr.y() + tr.height(),
           });
         });
       });
     }
-  }, [cuts, sortedCutIds]);
+  }, [cuts, sortedCutIds, updateCut]);
 
   if (!imageDataUrl) {
     return 'no image';
@@ -101,9 +107,9 @@ function Editing({ imageDataUrl, cuts, sortedCutIds, updateCut }) {
 
   return (
     <Container>
+      <div>{JSON.stringify(sortedCutIds)}</div>
+      <div>{JSON.stringify(cuts, undefined, 2)}</div>
       <div ref={stageRef}></div>
-      <code>{JSON.stringify(sortedCutIds)}</code>
-      <code>{JSON.stringify(cuts)}</code>
     </Container>
   );
 }
