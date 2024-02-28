@@ -7,6 +7,15 @@ const Container = styled.div`
   background: #ffffff;
 `;
 
+const downloadURI = (uri, name) => {
+  let link = document.createElement('a');
+  link.download = name;
+  link.href = uri;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
 function PreviewIng({ imageDataUrl, cuts, sortedCutIds }) {
   const stageRef = useRef(null);
   const konvaRef = useRef({});
@@ -106,9 +115,18 @@ function PreviewIng({ imageDataUrl, cuts, sortedCutIds }) {
 
   return (
     <Container>
+      <button
+        disabled={!imageDataUrl}
+        onClick={() => {
+          const dataURL = konvaRef.current.stage.toDataURL({ pixelRatio: 1 });
+          downloadURI(dataURL, 'stage.png');
+        }}
+      >
+        Download
+      </button>
+      <div ref={stageRef}></div>
       <div>{JSON.stringify(sortedCutIds)}</div>
       <div>{JSON.stringify(cuts, undefined, 2)}</div>
-      <div ref={stageRef}></div>
     </Container>
   );
 }
