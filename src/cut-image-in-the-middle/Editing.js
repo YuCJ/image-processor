@@ -7,7 +7,7 @@ const Container = styled.div`
   background: #ffffff;
 `;
 
-function Editing({ imageDataUrl, cuts, sortedCutIds, updateCut }) {
+function Editing({ imageDataUrl, cuts, sortedCutIds, updateCut, removeCut }) {
   const stageRef = useRef(null);
   const konvaRef = useRef({});
 
@@ -62,6 +62,35 @@ function Editing({ imageDataUrl, cuts, sortedCutIds, updateCut }) {
           })
       );
       konvaRef.current.cutsLayer.add(...rects);
+      const cutRemoveButtons = sortedCutIds.map(id => {
+        const label = new Konva.Label({
+          x: konvaRef.current.cutsLayer.width() - 140,
+          y: cuts[id].top + 5,
+        });
+        label.add(
+          new Konva.Tag({
+            fill: 'red',
+            pointerDirection: 'left',
+            pointerWidth: 20,
+            pointerHeight: 28,
+            lineJoin: 'round',
+          })
+        );
+        label.add(
+          new Konva.Text({
+            text: 'Remove Cut',
+            fontFamily: 'Calibri',
+            fontSize: 18,
+            padding: 5,
+            fill: 'white',
+          })
+        );
+        label.on('click', () => {
+          removeCut(id);
+        });
+        return label;
+      });
+
       rects.forEach((rect, i) => {
         const tr = new Konva.Transformer({
           nodes: [rect],
@@ -98,6 +127,8 @@ function Editing({ imageDataUrl, cuts, sortedCutIds, updateCut }) {
           });
         });
       });
+
+      konvaRef.current.cutsLayer.add(...cutRemoveButtons);
     }
   }, [cuts, sortedCutIds, updateCut]);
 
@@ -125,6 +156,7 @@ Editing.propTypes = {
   ).isRequired,
   sortedCutIds: PropTypes.arrayOf(PropTypes.string).isRequired,
   updateCut: PropTypes.func.isRequired,
+  removeCut: PropTypes.func.isRequired,
 };
 
 export default Editing;

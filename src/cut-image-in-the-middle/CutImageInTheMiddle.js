@@ -77,20 +77,6 @@ export default function CutImageInTheMiddle() {
           >
             Clear
           </button>
-          <button
-            onClick={() => {
-              removeCut('2');
-            }}
-          >
-            Remove Cut 2
-          </button>
-          <button
-            onClick={() => {
-              updateCut('2', { top: 5, bottom: 6 });
-            }}
-          >
-            Update Cut 2
-          </button>
         </Controls>
       ) : null}
       {isEditing ? (
@@ -99,6 +85,7 @@ export default function CutImageInTheMiddle() {
           sortedCutIds={sortedCutIds}
           imageDataUrl={imageDataUrl}
           updateCut={updateCut}
+          removeCut={removeCut}
         />
       ) : (
         <PreviewIng
