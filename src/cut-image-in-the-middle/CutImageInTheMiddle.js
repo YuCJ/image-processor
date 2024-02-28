@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import Editing from './Editing';
 import PreviewIng from './PreviewIng';
 import useCuts from './useCuts';
+import ImageInput from '../ImageInput';
 
 const Page = styled.div`
   padding: 20px 40px;
@@ -34,6 +35,9 @@ export default function CutImageInTheMiddle() {
     <Page>
       <H1>Cut Image in the Middle</H1>
       <Controls>
+        <ImageInput onChange={() => {}} />
+      </Controls>
+      <Controls>
         <button
           onClick={() => {
             setIsEditing(!isEditing);
@@ -42,36 +46,38 @@ export default function CutImageInTheMiddle() {
           {isEditing ? 'Preview' : 'Edit'}
         </button>
       </Controls>
-      <Controls>
-        <button
-          onClick={() => {
-            addCuts({ top: 0, bottom: 0 });
-          }}
-        >
-          Add Cut
-        </button>
-        <button
-          onClick={() => {
-            clearCuts();
-          }}
-        >
-          Clear
-        </button>
-        <button
-          onClick={() => {
-            removeCut('2');
-          }}
-        >
-          Remove Cut 2
-        </button>
-        <button
-          onClick={() => {
-            updateCut('2', { top: 5, bottom: 6 });
-          }}
-        >
-          Update Cut 2
-        </button>
-      </Controls>
+      {isEditing ? (
+        <Controls>
+          <button
+            onClick={() => {
+              addCuts({ top: 0, bottom: 0 });
+            }}
+          >
+            Add Cut
+          </button>
+          <button
+            onClick={() => {
+              clearCuts();
+            }}
+          >
+            Clear
+          </button>
+          <button
+            onClick={() => {
+              removeCut('2');
+            }}
+          >
+            Remove Cut 2
+          </button>
+          <button
+            onClick={() => {
+              updateCut('2', { top: 5, bottom: 6 });
+            }}
+          >
+            Update Cut 2
+          </button>
+        </Controls>
+      ) : null}
       <code>{JSON.stringify(sortedIds)}</code>
       <code>{JSON.stringify(cuts)}</code>
       {isEditing ? Editing : PreviewIng}
