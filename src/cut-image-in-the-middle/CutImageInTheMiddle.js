@@ -23,9 +23,10 @@ const H1 = styled.h1`
 
 export default function CutImageInTheMiddle() {
   const [isEditing, setIsEditing] = useState();
+  const [imageDataUrl, setImageDateUrl] = useState('');
   const {
     cuts,
-    sortedIds,
+    sortedIds: sortedCutIds,
     add: addCuts,
     clear: clearCuts,
     update: updateCut,
@@ -35,7 +36,11 @@ export default function CutImageInTheMiddle() {
     <Page>
       <H1>Cut Image in the Middle</H1>
       <Controls>
-        <ImageInput onChange={() => {}} />
+        <ImageInput
+          onChange={result => {
+            setImageDateUrl(result.imageDataUrl);
+          }}
+        />
       </Controls>
       <Controls>
         <button
@@ -78,9 +83,15 @@ export default function CutImageInTheMiddle() {
           </button>
         </Controls>
       ) : null}
-      <code>{JSON.stringify(sortedIds)}</code>
-      <code>{JSON.stringify(cuts)}</code>
-      {isEditing ? <Editing /> : <PreviewIng />}
+      {isEditing ? (
+        <Editing
+          cuts={cuts}
+          sortedCutIds={sortedCutIds}
+          imageDataUrl={imageDataUrl}
+        />
+      ) : (
+        <PreviewIng />
+      )}
     </Page>
   );
 }
