@@ -1,9 +1,9 @@
 import { hot } from 'react-hot-loader/root';
-import Article from '../features/article/Article';
+import CutImageInTheMiddle from '../cut-image-in-the-middle';
 import React from 'react';
 
 function App() {
-  return <Article />;
+  return <CutImageInTheMiddle />;
 }
 
 export default hot(App);
